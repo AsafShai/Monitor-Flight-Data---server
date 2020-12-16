@@ -4,7 +4,7 @@ const prompt = require('prompt');
 
 const express = require('express');
 const httpServer = require('http');
-const { resolve } = require('path');
+// const { resolve } = require('path');
 app = express();
 server = httpServer.createServer(app);
 const io = require('socket.io')(server, {
@@ -43,7 +43,10 @@ var schema = {
 
 prompt.start();
 
-const InputData = (socket) => {
+/**
+ * gets validated input from the the prompt and returns it with a promise
+ */
+const InputData = () => {
     return new Promise((resolve, reject) => {
         prompt.get(schema, function (err, result) {
             if (err) {
@@ -57,20 +60,17 @@ const InputData = (socket) => {
     })
 }
 
-
-const keyPress = async () => {
-    process.stdin.setRawMode(true);
-    return new Promise(resolve = process.stdin.once('data', () => {
-        process.stdin.setRawMode(false);
-        resolve();
-    })).catch(err => console.log(err)) 
-    
-}
-
+/**
+ * the server listen on the PORT and waits for clients
+ */
 server.listen(PORT, () =>{ 
     console.log("listening on port " + PORT )
 });
 
+/**
+ * gets a client when he connects.
+ * always gets input from the prompt and send the the client
+ */
 io.on('connection', async (socket) =>{
     console.log("client connected");
 
@@ -79,9 +79,8 @@ io.on('connection', async (socket) =>{
     })
 
     while (true) {
-        const flightData = await InputData(socket);
-        //await keyPress();
-        console.log("finished");
+        const flightData = await InputData();
+        console.log("finished getting prompt data");
         socket.emit("sendingData", flightData);
     }
 
